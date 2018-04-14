@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  publish-stage:
+  publish_stage:
     docker:
       - image: circleci/python:2.7
     steps:
