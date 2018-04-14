@@ -5,7 +5,7 @@ jobs:
       - image: circleci/python:2.7
     steps:
       - checkout
-      - run: pip install --upgrade awscli==1.15.4
+      - run: sudo pip install --upgrade awscli==1.15.4
       - run: $(aws ecr get-login --no-include-email)
       - run: make push-stage
 workflows:
