@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: sudo pip install --upgrade awscli==1.15.4
-      - run: $(aws ecr get-login --no-include-email)
+      - run: $(AWS_ACCESS_KEY_ID=$STAGING_AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$STAGING_AWS_SECRET_ACCESS_KEY aws ecr get-login --no-include-email)
       - run: make push-stage
 workflows:
   version: 2
