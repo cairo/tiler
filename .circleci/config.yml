@@ -4,6 +4,7 @@ jobs:
     docker:
       - image: circleci/python:2.7
     steps:
+      - setup_remote_docker
       - checkout
       - run: sudo pip install --upgrade awscli==1.15.4
       - run: $(AWS_ACCESS_KEY_ID=$STAGING_AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$STAGING_AWS_SECRET_ACCESS_KEY aws ecr get-login --no-include-email)
