@@ -3,6 +3,8 @@
 set -x
 
 download_tiles() {
+    df
+
     wget -O a1.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.A1.jpg
     wget -O a2.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.A2.jpg
     wget -O b1.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.B1.jpg
@@ -11,15 +13,25 @@ download_tiles() {
     wget -O c2.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.C2.jpg
     wget -O d1.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.D1.jpg
     wget -O d2.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.D2.jpg
+
+    df
 }
 
 translate_tiles() {
+    df
+
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -180 90 -90 0 a1.jpg a1.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -180 0 -90 -90 a2.jpg a2.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -90 90 0 0 b1.jpg b1.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -90 0 0 -90 b2.jpg b2.tif
+
+    df
+
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr 0 90 90 0 c1.jpg c1.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr 0 0 90 -90 c2.jpg c2.tif
+
+    df
+
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr 90 90 180 0 d1.jpg d1.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr 90 0 180 -90 d2.jpg d2.tif
 }
