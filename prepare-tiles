@@ -26,7 +26,7 @@ translate_tiles() {
 
 build_xyz_tiles() {
     gdalbuildvrt mosaic.vrt *.tif
-    gdal2tiles.py --zoom 0-8 mosaic.vrt tiles
+    gdal2tiles.py -v --zoom 0-8 mosaic.vrt tiles
 }
 
 upload_xyz_tiles() {
