@@ -30,7 +30,7 @@ build_xyz_tiles() {
 }
 
 upload_xyz_tiles() {
-    aws --endpoint-url $AWS_ENDPOINT_URL s3 cp tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1
+    aws --endpoint-url $AWS_ENDPOINT_URL s3 cp tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1 --recursive
 }
 
 download_tiles "raw/winter"
