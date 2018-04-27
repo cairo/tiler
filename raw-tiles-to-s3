@@ -11,14 +11,14 @@ set -x
 # burden on public servers. :)
 
 upload_blue_marble_tileset() {
-    wget -O a1.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.A1.jpg
-    wget -O a2.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.A2.jpg
-    wget -O b1.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.B1.jpg
-    wget -O b2.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.B2.jpg
-    wget -O c1.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.C1.jpg
-    wget -O c2.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.C2.jpg
-    wget -O d1.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.D1.jpg
-    wget -O d2.jpg https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73580/world.topo.bathy.200401.3x21600x21600.D2.jpg
+    wget -O a1.jpg "$2.A1.jpg"
+    wget -O a2.jpg "$2.A2.jpg"
+    wget -O b1.jpg "$2.B1.jpg"
+    wget -O b2.jpg "$2.B2.jpg"
+    wget -O c1.jpg "$2.C1.jpg"
+    wget -O c2.jpg "$2.C2.jpg"
+    wget -O d1.jpg "$2.D1.jpg"
+    wget -O d2.jpg "$2.D2.jpg"
 
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp a1.jpg s3://$OUTPUT_BUCKET_NAME/$1/a1.jpg
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp a2.jpg s3://$OUTPUT_BUCKET_NAME/$1/a2.jpg
@@ -28,6 +28,14 @@ upload_blue_marble_tileset() {
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp c2.jpg s3://$OUTPUT_BUCKET_NAME/$1/c2.jpg
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp d1.jpg s3://$OUTPUT_BUCKET_NAME/$1/d1.jpg
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp d2.jpg s3://$OUTPUT_BUCKET_NAME/$1/d2.jpg
+
+    rm a1.jpg a2.jpg
+    rm b1.jpg b2.jpg
+    rm c1.jpg c2.jpg
+    rm d1.jpg d2.jpg
 }
 
-upload_blue_marble_tileset "raw/winter"
+upload_blue_marble_tileset "raw/winter" "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200412.3x21600x21600"
+upload_blue_marble_tileset "raw/spring" "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73630/world.topo.bathy.200403.3x21600x21600"
+upload_blue_marble_tileset "raw/summer" "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73726/world.topo.bathy.200406.3x21600x21600"
+upload_blue_marble_tileset "raw/autumn" "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73801/world.topo.bathy.200409.3x21600x21600"
