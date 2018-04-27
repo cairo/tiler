@@ -33,7 +33,17 @@ upload_xyz_tiles() {
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1 --recursive
 }
 
-download_tiles "raw/winter"
-translate_tiles
-build_xyz_tiles
-upload_xyz_tiles "imagery/winter"
+prepare_imagery_tileset() {
+    download_tiles "$1"
+    translate_tiles
+    build_xyz_tiles
+    upload_xyz_tiles "$2"
+
+    rm *.jpg *.tif
+    rm -r tiles
+}
+
+prepare_imagery_tileset "raw/spring" "imagery/spring"
+prepare_imagery_tileset "raw/summer" "imagery/summer"
+prepare_imagery_tileset "raw/autumn" "imagery/autumn"
+prepare_imagery_tileset "raw/winter" "imagery/winter"
