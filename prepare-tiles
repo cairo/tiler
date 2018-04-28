@@ -39,7 +39,7 @@ translate_elevation_tiles() {
 }
 
 build_xyz_tiles() {
-    gdalbuildvrt mosaic.vrt *.tif
+    gdalbuildvrt -a_srs EPSG:4326 mosaic.vrt *.tif
     gdal2tiles.py -v --zoom 0-8 mosaic.vrt tiles
 }
 
@@ -47,9 +47,18 @@ upload_xyz_tiles() {
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1 --recursive
 }
 
-clean_tiles() {
+clean_imagery() {
     rm *.jpg *.tif *.vrt
     rm -r tiles
+}
+
+clean_elevation() {
+    for tile in {a..p}; do
+        rm $tile
+        rm $tile.hdr
+    done
+
+    rm *.tif *.vrt
 }
 
 prepare_imagery_tileset() {
@@ -57,7 +66,7 @@ prepare_imagery_tileset() {
     translate_imagery_tiles
     build_xyz_tiles
     upload_xyz_tiles "$2"
-    clean_tiles
+    clean_imagery
 }
 
 prepare_elevation_tileset() {
@@ -65,7 +74,7 @@ prepare_elevation_tileset() {
     translate_elevation_tiles
     build_xyz_tiles
     upload_xyz_tiles "elevation"
-    clean_tiles
+    clean_elevation
 }
 
 prepare_elevation_tileset
