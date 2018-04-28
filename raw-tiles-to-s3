@@ -35,7 +35,19 @@ upload_blue_marble_tileset() {
     rm d1.jpg d2.jpg
 }
 
+upload_noaa_globe_tileset() {
+    wget https://www.ngdc.noaa.gov/mgg/topo/DATATILES/elev/all10g.zip
+    wget https://www.ngdc.noaa.gov/mgg/topo/elev/esri/hdr/{a..p}10g.hdr
+
+    unzip all10g.zip
+    for tile in {a..p}; do
+        aws --endpoint-url $AWS_ENDPOINT_URL s3 cp "${tile}10g.hdr" s3://$OUTPUT_BUCKET_NAME/raw/elevation/$tile.hdr
+        aws --endpoint-url $AWS_ENDPOINT_URL s3 cp "all10/${tile}10g" s3://$OUTPUT_BUCKET_NAME/raw/elevation/$tile
+    done
+}
+
 upload_blue_marble_tileset "raw/winter" "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200412.3x21600x21600"
 upload_blue_marble_tileset "raw/spring" "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73630/world.topo.bathy.200403.3x21600x21600"
 upload_blue_marble_tileset "raw/summer" "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73726/world.topo.bathy.200406.3x21600x21600"
 upload_blue_marble_tileset "raw/autumn" "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73801/world.topo.bathy.200409.3x21600x21600"
+upload_noaa_globe_tileset

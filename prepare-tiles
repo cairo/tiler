@@ -2,7 +2,7 @@
 
 set -x
 
-download_tiles() {
+download_imagery_tiles() {
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp s3://$OUTPUT_BUCKET_NAME/$1/a1.jpg a1.jpg
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp s3://$OUTPUT_BUCKET_NAME/$1/a2.jpg a2.jpg
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp s3://$OUTPUT_BUCKET_NAME/$1/b1.jpg b1.jpg
@@ -13,7 +13,14 @@ download_tiles() {
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp s3://$OUTPUT_BUCKET_NAME/$1/d2.jpg d2.jpg
 }
 
-translate_tiles() {
+download_elevation_tiles() {
+    for tile in {a..p}; do
+        aws --endpoint-url $AWS_ENDPOINT_URL s3 cp s3://$OUTPUT_BUCKET_NAME/raw/elevation/$tile $tile
+        aws --endpoint-url $AWS_ENDPOINT_URL s3 cp s3://$OUTPUT_BUCKET_NAME/raw/elevation/$tile.hdr $tile.hdr
+    done
+}
+
+translate_imagery_tiles() {
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -180 90 -90 0 a1.jpg a1.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -180 0 -90 -90 a2.jpg a2.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -90 90 0 0 b1.jpg b1.tif
@@ -22,6 +29,13 @@ translate_tiles() {
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr 0 0 90 -90 c2.jpg c2.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr 90 90 180 0 d1.jpg d1.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr 90 0 180 -90 d2.jpg d2.tif
+}
+
+translate_elevation_tiles() {
+    for tile in {a..p}; do
+        gdal_translate -scale 0 10000 $tile $tile.tif
+        gdal_edit.py -unsetnodata $tile.tif
+    done
 }
 
 build_xyz_tiles() {
@@ -33,17 +47,29 @@ upload_xyz_tiles() {
     aws --endpoint-url $AWS_ENDPOINT_URL s3 cp tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1 --recursive
 }
 
+clean_tiles() {
+    rm *.jpg *.tif *.vrt
+    rm -r tiles
+}
+
 prepare_imagery_tileset() {
-    download_tiles "$1"
-    translate_tiles
+    download_imagery_tiles "$1"
+    translate_imagery_tiles
     build_xyz_tiles
     upload_xyz_tiles "$2"
+    clean_tiles
+}
 
-    rm *.jpg *.tif
-    rm -r tiles
+prepare_elevation_tileset() {
+    download_elevation_tiles
+    translate_elevation_tiles
+    build_xyz_tiles
+    upload_xyz_tiles "elevation"
+    clean_tiles
 }
 
 prepare_imagery_tileset "raw/spring" "imagery/spring"
 prepare_imagery_tileset "raw/summer" "imagery/summer"
 prepare_imagery_tileset "raw/autumn" "imagery/autumn"
 prepare_imagery_tileset "raw/winter" "imagery/winter"
+prepare_elevation_tileset
