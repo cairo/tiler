@@ -65,7 +65,7 @@ build_vector_xyz_tiles() {
 }
 
 upload_xyz_tiles() {
-    aws --endpoint-url $AWS_ENDPOINT_URL --recursive --exclude "*" --include "$2" s3 cp tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1
+    aws --endpoint-url $AWS_ENDPOINT_URL s3 cp --recursive --exclude "*" --include "$2" tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1
 }
 
 clean_imagery() {
