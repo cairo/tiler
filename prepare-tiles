@@ -33,7 +33,8 @@ translate_imagery_tiles() {
 
 translate_elevation_tiles() {
     for tile in {a..p}; do
-        gdal_translate -scale 0 10000 $tile $tile.tif
+        echo "PIXELTYPE      SIGNEDINT" >> $tile.hdr
+        gdal_translate -ot Byte -scale 0 10000 $tile $tile.tif
         gdal_edit.py -unsetnodata $tile.tif
     done
 }
