@@ -20,6 +20,10 @@ download_elevation_tiles() {
     done
 }
 
+download_vector_tiles() {
+    aws --endpoint-url $AWS_ENDPOINT_URL s3 cp s3://$OUTPUT_BUCKET_NAME/raw/vector/map.json map.json
+}
+
 translate_imagery_tiles() {
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -180 90 -90 0 a1.jpg a1.tif
     gdal_translate -of GTiff -a_srs EPSG:4326 -a_ullr -180 0 -90 -90 a2.jpg a2.tif
@@ -39,13 +43,29 @@ translate_elevation_tiles() {
     done
 }
 
-build_xyz_tiles() {
+build_raster_xyz_tiles() {
     gdalbuildvrt -a_srs EPSG:4326 mosaic.vrt *.tif
-    gdal2tiles.py -v --zoom 0-8 mosaic.vrt tiles
+    gdal2tiles.py --zoom 0-8 mosaic.vrt tiles
+}
+
+build_vector_xyz_tiles() {
+    tippecanoe map.json --maximum-zoom=8 --detect-shared-borders --buffer=0 --output-to-directory=tiles
+
+    set +x
+    for pbf in $(find tiles -name '*.pbf'); do
+        local z=$(echo $pbf | cut -d'/' -f 2)
+        local x=$(echo $pbf | cut -d'/' -f 3)
+        local y=$(echo $pbf | cut -d'/' -f 4 | sed 's/.pbf//')
+
+        local flip_y=$((2 ** $z - 1 - $y))
+
+        tippecanoe-decode $pbf $z $x $y > "tiles/$z/$x/$flip_y.json"
+    done
+    set -x
 }
 
 upload_xyz_tiles() {
-    aws --endpoint-url $AWS_ENDPOINT_URL s3 cp tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1 --recursive
+    aws --endpoint-url $AWS_ENDPOINT_URL --recursive --exclude "*" --include "$2" s3 cp tiles s3://$OUTPUT_BUCKET_NAME/$OUTPUT_DIR/$1
 }
 
 clean_imagery() {
@@ -60,24 +80,38 @@ clean_elevation() {
     done
 
     rm *.tif *.vrt
+    rm -r tiles
+}
+
+clean_vector() {
+    rm map.json
+    rm -r tiles
 }
 
 prepare_imagery_tileset() {
     download_imagery_tiles "$1"
     translate_imagery_tiles
-    build_xyz_tiles
-    upload_xyz_tiles "$2"
+    build_raster_xyz_tiles
+    upload_xyz_tiles "$2" "*.png"
     clean_imagery
 }
 
 prepare_elevation_tileset() {
     download_elevation_tiles
     translate_elevation_tiles
-    build_xyz_tiles
-    upload_xyz_tiles "elevation"
+    build_raster_xyz_tiles
+    upload_xyz_tiles "elevation" "*.png"
     clean_elevation
 }
 
+prepare_vector_tileset() {
+    download_vector_tiles
+    build_vector_xyz_tiles
+    upload_xyz_tiles "vector" "*.json"
+    clean_vector
+}
+
+prepare_vector_tileset
 prepare_elevation_tileset
 prepare_imagery_tileset "raw/spring" "imagery/spring"
 prepare_imagery_tileset "raw/summer" "imagery/summer"
